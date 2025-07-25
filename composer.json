@@ -1,0 +1,32 @@
+{
+    "name": "wc-promptpay/wc-promptpay",
+    "description": "WooCommerce PromptPay payment gateway with QR code generation and n8n webhook integration",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "your.email@example.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WC_PromptPay\\": "includes/"
+        }
+    },
+    "scripts": {
+        "install-phpqrcode": [
+            "mkdir -p vendor/phpqrcode",
+            "curl -L https://github.com/t0k4rt/phpqrcode/archive/master.zip -o phpqrcode.zip",
+            "unzip phpqrcode.zip -d vendor/",
+            "mv vendor/phpqrcode-master/* vendor/phpqrcode/",
+            "rm -rf vendor/phpqrcode-master phpqrcode.zip"
+        ]
+    }
+}
