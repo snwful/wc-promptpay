@@ -78,6 +78,9 @@ class WooPromptPayN8N {
         // Load force reload test (temporary)
         require_once WPPN8N_DIR . 'force-reload-test.php';
         
+        // Load BLOCKS FIX - WooCommerce Blocks solution
+        require_once WPPN8N_DIR . 'blocks-checkout-fix.php';
+        
         // Load DIRECT FIX - Last resort solution
         require_once WPPN8N_DIR . 'direct-checkout-fix.php';
         
