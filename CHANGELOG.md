@@ -2,6 +2,16 @@
 
 All notable changes to the Woo PromptPay n8n plugin will be documented in this file.
 
+## [1.4.1] - 2025-07-28
+### Improved
+- Add stronger debug logging for plugin and checkout rendering hooks
+
+### Fixed
+- Ensure plugin reload and debug log freshness after code updates
+
+### Changed
+- Bump plugin version to 1.4.1
+
 ## [1.4.0] - 2025-07-28
 ### Added
 - Manual injection workaround to display PromptPay payment method in checkout options

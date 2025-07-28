@@ -3,7 +3,7 @@
  * Plugin Name: Woo PromptPay n8n
  * Description: Accept PromptPay payments in WooCommerce with QR generation, slip upload and n8n webhook confirmation.
  * Author: Senior WordPress Developer
- * Version: 1.4.0
+ * Version: 1.4.1
  * License: GPL2+
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'WPPN8N_VERSION', '1.4.0' );
+define( 'WPPN8N_VERSION', '1.4.1' );
 define( 'WPPN8N_FILE', __FILE__ );
 define( 'WPPN8N_BASENAME', plugin_basename( __FILE__ ) );
 define( 'WPPN8N_DIR', plugin_dir_path( __FILE__ ) );
@@ -74,6 +74,9 @@ class WooPromptPayN8N {
         
         // Load debug helper
         require_once WPPN8N_DIR . 'debug-gateway.php';
+        
+        // Debug: Plugin loading
+        error_log( 'WooPromptPay v1.4.0: Plugin initializing at ' . current_time( 'Y-m-d H:i:s' ) );
         
         // Initialize hooks
         $this->init_hooks();
@@ -289,11 +292,17 @@ class WooPromptPayN8N {
      * Force inject PromptPay option into checkout
      */
     public function inject_promptpay_option() {
+        error_log( 'WooPromptPay v1.4.0: inject_promptpay_option called at ' . current_time( 'Y-m-d H:i:s' ) );
+        
         if ( ! is_checkout() ) {
+            error_log( 'WooPromptPay: Not checkout page, skipping injection' );
             return;
         }
         
+        error_log( 'WooPromptPay: Is checkout page, proceeding with injection' );
+        
         $available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+        error_log( 'WooPromptPay: Available gateways for injection: ' . implode( ', ', array_keys( $available_gateways ) ) );
         
         if ( ! isset( $available_gateways['promptpay_n8n'] ) ) {
             error_log( 'WooPromptPay: Gateway not available for injection' );
@@ -303,7 +312,7 @@ class WooPromptPayN8N {
         $gateway = $available_gateways['promptpay_n8n'];
         $total = WC()->cart->get_total( 'raw' );
         
-        error_log( 'WooPromptPay: Injecting PromptPay option manually' );
+        error_log( 'WooPromptPay v1.4.0: SUCCESSFULLY injecting PromptPay option manually - Total: ' . $total );
         
         ?>
         <div id="promptpay-manual-injection" style="margin: 20px 0; padding: 15px; border: 2px solid #0073aa; border-radius: 5px; background: #f0f8ff;">
