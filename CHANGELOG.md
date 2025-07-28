@@ -2,6 +2,28 @@
 
 All notable changes to the Woo PromptPay n8n plugin will be documented in this file.
 
+## [1.5.0] - 2025-07-28
+### Added
+- Production-ready JavaScript DOM injection solution for PromptPay checkout rendering
+- Comprehensive checkout element detection with multiple fallback selectors
+- Thai language support for PromptPay payment interface
+- File upload validation with proper error handling
+- QR code placeholder with PromptPay ID display
+- Animation and visual feedback for better user experience
+
+### Fixed
+- Resolved all checkout hook rendering issues by implementing client-side injection
+- Fixed PromptPay payment method not appearing in checkout payment options
+
+### Changed
+- Replaced test injection with production solution
+- Bump plugin version to 1.5.0
+
+### Improved
+- Enhanced checkout integration with robust element detection
+- Better error handling and user feedback
+- Responsive design for mobile and desktop
+
 ## [1.4.1] - 2025-07-28
 ### Improved
 - Add stronger debug logging for plugin and checkout rendering hooks
