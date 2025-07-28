@@ -14,6 +14,11 @@ add_action( 'woocommerce_checkout_after_order_review', 'force_promptpay_injectio
 add_action( 'woocommerce_checkout_after_customer_details', 'force_promptpay_injection_test_2' );
 add_action( 'wp_footer', 'force_promptpay_injection_footer' );
 
+// Aggressive injection - try all possible hooks
+add_action( 'wp_head', 'force_promptpay_aggressive_injection' );
+add_action( 'woocommerce_before_checkout_form', 'force_promptpay_before_checkout' );
+add_action( 'woocommerce_checkout_before_order_review', 'force_promptpay_before_order_review' );
+
 function force_promptpay_injection_test() {
     if ( ! is_checkout() ) {
         return;
@@ -196,4 +201,142 @@ function force_promptpay_injection_footer() {
     });
     </script>
     <?php
+}
+
+// Aggressive injection functions
+function force_promptpay_aggressive_injection() {
+    if ( ! is_checkout() ) {
+        return;
+    }
+    
+    error_log( 'AGGRESSIVE INJECTION: wp_head hook fired on checkout' );
+    
+    ?>
+    <script type="text/javascript">
+    // Wait for page to fully load
+    window.addEventListener('load', function() {
+        console.log('AGGRESSIVE INJECTION: Page loaded, starting aggressive injection');
+        
+        // Try multiple selectors to find checkout elements
+        var selectors = [
+            '#payment',
+            '.woocommerce-checkout-payment',
+            '.payment_methods',
+            'form.checkout',
+            '.checkout-payment',
+            '#order_review',
+            '.woocommerce-checkout-review-order'
+        ];
+        
+        var targetElement = null;
+        for (var i = 0; i < selectors.length; i++) {
+            var element = document.querySelector(selectors[i]);
+            if (element) {
+                targetElement = element;
+                console.log('AGGRESSIVE INJECTION: Found target element with selector:', selectors[i]);
+                break;
+            }
+        }
+        
+        if (targetElement) {
+            // Create PromptPay injection
+            var promptpayDiv = document.createElement('div');
+            promptpayDiv.id = 'promptpay-aggressive-injection';
+            promptpayDiv.style.cssText = 'margin: 20px 0; padding: 20px; border: 3px solid #ff6600; background: #fff3e0; border-radius: 10px; position: relative; z-index: 9999;';
+            
+            promptpayDiv.innerHTML = '<h2 style="color: #ff6600; margin-top: 0; animation: pulse 1s infinite;">🔥 AGGRESSIVE: PromptPay Payment Method</h2>' +
+                '<p><strong>This was injected via aggressive JavaScript!</strong></p>' +
+                '<div style="margin: 15px 0;">' +
+                    '<label style="display: block; margin-bottom: 10px;">' +
+                        '<input type="radio" name="payment_method" value="promptpay_aggressive" id="payment_method_promptpay_aggressive" />' +
+                        '<strong style="font-size: 16px;"> PromptPay Payment (Aggressive Injection)</strong>' +
+                    '</label>' +
+                    '<div style="margin-left: 25px; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">' +
+                        '<p>Pay with PromptPay by scanning the QR code with your mobile banking app.</p>' +
+                        '<div style="text-align: center; margin: 15px 0; padding: 30px; background: #f9f9f9; border: 2px dashed #ccc;">' +
+                            '<p style="font-size: 18px; margin: 0;"><strong>QR Code Area (Aggressive)</strong></p>' +
+                            '<p style="margin: 5px 0;">Amount: ฿35,065.00</p>' +
+                            '<p style="font-size: 12px; color: #666;">QR code will be generated here</p>' +
+                        '</div>' +
+                        '<div style="margin: 15px 0;">' +
+                            '<label style="display: block; margin-bottom: 5px;"><strong>Upload Payment Slip:</strong></label>' +
+                            '<input type="file" id="promptpay_slip_aggressive" accept="image/*,.pdf" style="width: 100%; padding: 5px;" />' +
+                            '<p style="font-size: 12px; color: #666; margin: 5px 0 0 0;">Upload your payment slip (JPG, PNG, or PDF, max 5MB)</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            
+            // Insert after target element
+            targetElement.parentNode.insertBefore(promptpayDiv, targetElement.nextSibling);
+            
+            console.log('AGGRESSIVE INJECTION: PromptPay injected successfully!');
+            
+            // Add event listeners
+            var radioButton = document.getElementById('payment_method_promptpay_aggressive');
+            if (radioButton) {
+                radioButton.addEventListener('change', function() {
+                    if (this.checked) {
+                        console.log('AGGRESSIVE INJECTION: PromptPay selected');
+                        var placeOrderBtn = document.getElementById('place_order');
+                        if (placeOrderBtn) {
+                            placeOrderBtn.disabled = true;
+                            placeOrderBtn.textContent = 'Please upload payment slip first';
+                        }
+                    }
+                });
+            }
+            
+            // Handle file upload
+            var fileInput = document.getElementById('promptpay_slip_aggressive');
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        console.log('AGGRESSIVE INJECTION: File selected:', this.files[0].name);
+                        var placeOrderBtn = document.getElementById('place_order');
+                        if (placeOrderBtn) {
+                            placeOrderBtn.disabled = false;
+                            placeOrderBtn.textContent = 'Place order';
+                        }
+                    }
+                });
+            }
+            
+        } else {
+            console.log('AGGRESSIVE INJECTION: No target element found! Selectors tried:', selectors);
+            
+            // Last resort - inject at body end
+            var bodyDiv = document.createElement('div');
+            bodyDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99999; background: #ff0000; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5);';
+            bodyDiv.innerHTML = '<h2>🚨 LAST RESORT INJECTION</h2><p>PromptPay could not find checkout elements!</p><button onclick="this.parentNode.remove()">Close</button>';
+            document.body.appendChild(bodyDiv);
+        }
+    });
+    </script>
+    
+    <style>
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    </style>
+    <?php
+}
+
+function force_promptpay_before_checkout() {
+    if ( ! is_checkout() ) {
+        return;
+    }
+    
+    error_log( 'BEFORE CHECKOUT: Hook fired' );
+    echo '<div style="background: #ffeb3b; padding: 10px; margin: 10px 0; border-radius: 5px;"><strong>🟡 BEFORE CHECKOUT HOOK WORKS!</strong></div>';
+}
+
+function force_promptpay_before_order_review() {
+    if ( ! is_checkout() ) {
+        return;
+    }
+    
+    error_log( 'BEFORE ORDER REVIEW: Hook fired' );
+    echo '<div style="background: #9c27b0; color: white; padding: 10px; margin: 10px 0; border-radius: 5px;"><strong>🟣 BEFORE ORDER REVIEW HOOK WORKS!</strong></div>';
 }
