@@ -1,116 +1,121 @@
-=== WC PromptPay ===
-Contributors: yourname
-Tags: woocommerce, payment, promptpay, thailand, qr-code
-Requires at least: 5.0
+=== Woo PromptPay n8n ===
+Contributors: seniordev
+Tags: woocommerce, payment, promptpay, thailand, n8n, webhook
+Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
-License: GPLv2 or later
+Stable tag: 1.1.0
+License: GPL2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WooCommerce PromptPay payment gateway with QR code generation and n8n webhook integration for automatic payment verification.
+Accept PromptPay payments in WooCommerce with QR generation, slip upload and n8n webhook confirmation.
 
 == Description ==
 
-WC PromptPay is a comprehensive WooCommerce payment gateway that enables Thai businesses to accept payments via PromptPay QR codes. The plugin features automatic payment verification through n8n webhook integration, making it perfect for automated payment processing.
+Woo PromptPay n8n is a comprehensive WooCommerce payment gateway that enables Thai businesses to accept PromptPay payments with automatic verification through n8n workflows.
 
 **Key Features:**
 
-* **Multiple PromptPay ID Types**: Support for phone numbers, citizen ID, company tax ID, e-wallet ID, and K Shop ID
-* **QR Code Generation**: Automatic generation of PromptPay QR codes with or without amount
-* **Download QR Codes**: Customers can download QR codes for offline use
-* **n8n Integration**: Webhook integration for automatic payment verification
-* **Security**: Signature-based webhook verification for secure communication
-* **WooCommerce Blocks**: Full support for WooCommerce Blocks checkout
-* **HPOS Compatible**: Supports High-Performance Order Storage
-* **Auto-Update**: Built-in support for plugin auto-updates
+* **PromptPay QR Code Generation**: Automatically generates QR codes with order amount
+* **Secure File Upload**: Customers can upload payment slips with validation and security checks
+* **n8n Integration**: Seamless webhook integration for payment verification
+* **Anti-Spam Protection**: Upload attempt limits and CSRF protection
+* **Order Management**: Complete order notes and status tracking
+* **REST API**: RESTful endpoints for webhook integration
 
 **How It Works:**
 
 1. Customer selects PromptPay as payment method during checkout
-2. Plugin generates a PromptPay QR code with order details
-3. Customer scans QR code and makes payment via mobile banking app
-4. Plugin sends order details to n8n webhook for payment verification
-5. n8n verifies payment through bank APIs or other methods
-6. n8n sends confirmation back to plugin via webhook
-7. Plugin automatically updates order status upon payment confirmation
+2. Plugin generates QR code with order amount on Thank You page
+3. Customer scans QR code and makes payment via mobile banking
+4. Customer uploads payment slip through secure form
+5. Plugin sends data to n8n webhook for verification
+6. n8n processes payment verification and sends status back
+7. Plugin automatically updates order status based on verification result
 
-**n8n Webhook Integration:**
+**Security Features:**
 
-The plugin sends the following data to your n8n webhook:
-* Order ID and details
-* PromptPay ID and type
-* Payment amount
-* Customer information
-* Callback URL for status updates
-
-Your n8n workflow should verify the payment and send back a response to:
-`https://yoursite.com/wc-promptpay/webhook/{order_id}`
-
-**Webhook Response Format:**
-```json
-{
-  "order_id": "123",
-  "status": "success|failed|pending",
-  "message": "Payment verified",
-  "transaction_id": "optional_transaction_id",
-  "amount": 100.00
-}
-```
+* CSRF protection with WordPress nonces
+* File upload validation (MIME type, size, extension)
+* Upload attempt limits (configurable, default: 3 attempts)
+* Secure file storage with .htaccess protection
+* Anti-spam and duplicate request prevention
+* Order key verification for webhooks
 
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/wc-promptpay/`
+1. Upload the plugin files to `/wp-content/plugins/woo-promptpay-n8n/`
 2. Activate the plugin through the 'Plugins' screen in WordPress
-3. Go to WooCommerce > Settings > Payments > PromptPay
-4. Configure your PromptPay ID and n8n webhook settings
+3. Go to WooCommerce > Settings > Payments > PromptPay (n8n)
+4. Configure your PromptPay ID and n8n webhook URL
 5. Enable the payment method
-
-**Requirements:**
-* WooCommerce 5.0 or higher
-* PHP 7.4 or higher
-* GD Library (for QR code generation)
 
 == Frequently Asked Questions ==
 
-= What PromptPay ID types are supported? =
+= What is required to use this plugin? =
 
-The plugin supports:
-* Phone numbers (10 digits starting with 0)
-* Citizen ID (13 digits)
-* Company Tax ID (13 digits)
-* E-Wallet ID
-* K Shop ID
+* WordPress 6.0+
+* WooCommerce 8.0+
+* PHP 7.4+
+* Valid PromptPay ID (phone number, citizen ID, etc.)
+* n8n instance with webhook endpoint (optional but recommended)
 
-= Do I need n8n for the plugin to work? =
+= How do I set up n8n integration? =
 
-No, the plugin can generate QR codes without n8n. However, for automatic payment verification, you'll need to set up an n8n workflow or similar webhook endpoint.
+1. Create an n8n workflow with a webhook trigger
+2. Configure the workflow to process payment verification
+3. Set up a webhook response to send status back to WooCommerce
+4. Enter your n8n webhook URL in the plugin settings
 
-= How secure is the webhook integration? =
+= What file types are supported for slip uploads? =
 
-The plugin uses HMAC-SHA256 signature verification to ensure webhook authenticity. Make sure to set a strong secret key in the plugin settings.
+The plugin supports JPEG, PNG, and PDF files up to 5MB in size.
 
-= Can customers download QR codes? =
+= How many times can a customer upload a slip? =
 
-Yes, customers can download QR codes as PNG images for offline use or sharing.
+By default, customers can upload up to 3 slips per order. This is configurable in the plugin settings.
+
+= Is the plugin secure? =
+
+Yes, the plugin includes multiple security measures:
+- CSRF protection with nonces
+- File upload validation
+- Secure file storage
+- Anti-spam protection
+- Order verification
 
 == Screenshots ==
 
 1. Plugin settings page
-2. PromptPay payment method on checkout
-3. QR code display on thank you page
+2. PromptPay payment option on checkout
+3. QR code and upload form on Thank You page
 4. Order notes showing payment verification
 
 == Changelog ==
 
+= 1.0.1 =
+* Fixed: WooCommerce High-Performance Order Storage (HPOS) compatibility
+* Updated: Admin dashboard to use HPOS-compatible WooCommerce functions
+* Updated: Order queries to use wc_get_orders() instead of direct SQL
+* Improved: Plugin performance with HPOS enabled
+* Added: Proper HPOS compatibility declaration
+* Fixed: Admin dashboard statistics calculation for HPOS
+
 = 1.0.0 =
 * Initial release
 * PromptPay QR code generation
+* Secure file upload system
 * n8n webhook integration
-* WooCommerce Blocks support
-* HPOS compatibility
+* REST API endpoints
+* Complete security implementation
 
 == Upgrade Notice ==
 
+= 1.1.0 =
+Important update: Adds real-time payment verification and improved checkout UX. Recommended for all users.
+
+= 1.0.1 =
+Important update: Adds WooCommerce High-Performance Order Storage (HPOS) compatibility. Recommended for all users using WooCommerce 8.2+.
+
 = 1.0.0 =
-Initial release of WC PromptPay plugin.
+Initial release of Woo PromptPay n8n plugin.
