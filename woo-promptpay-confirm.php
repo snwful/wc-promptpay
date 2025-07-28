@@ -3,7 +3,7 @@
  * Plugin Name: Woo PromptPay n8n
  * Description: Accept PromptPay payments in WooCommerce with QR generation, slip upload and n8n webhook confirmation.
  * Author: Senior WordPress Developer
- * Version: 1.5.0
+ * Version: 1.6.0
  * License: GPL2+
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'WPPN8N_VERSION', '1.5.0' );
+define( 'WPPN8N_VERSION', '1.6.0' );
 define( 'WPPN8N_FILE', __FILE__ );
 define( 'WPPN8N_BASENAME', plugin_basename( __FILE__ ) );
 define( 'WPPN8N_DIR', plugin_dir_path( __FILE__ ) );
@@ -75,21 +75,8 @@ class WooPromptPayN8N {
         // Load debug helper
         require_once WPPN8N_DIR . 'debug-gateway.php';
         
-        // Load force reload test (temporary)
-        require_once WPPN8N_DIR . 'force-reload-test.php';
-        
-        // Load BLOCKS FIX - WooCommerce Blocks solution
-        require_once WPPN8N_DIR . 'blocks-checkout-fix.php';
-        
-        // Load DIRECT FIX - Last resort solution
-        require_once WPPN8N_DIR . 'direct-checkout-fix.php';
-        
-        // Load production PromptPay checkout injection
-        require_once WPPN8N_DIR . 'promptpay-checkout-injection.php';
-        
-        // Debug: Plugin loading
-        error_log( 'WooPromptPay v1.5.0: Plugin initializing at ' . current_time( 'Y-m-d H:i:s' ) );
-        error_log( 'WooPromptPay v1.5.0: Loading production checkout injection solution' );
+        // Load WooCommerce Blocks PromptPay solution
+        require_once WPPN8N_DIR . 'class-pp-blocks-checkout.php';
         
         // Initialize hooks
         $this->init_hooks();

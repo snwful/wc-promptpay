@@ -1,7 +1,10 @@
 <?php
 /**
- * WooCommerce Blocks Checkout Fix
- * Solution for WooCommerce Blocks (React-based checkout)
+ * WooCommerce Blocks PromptPay Integration
+ * Provides PromptPay payment method for WooCommerce Blocks checkout
+ * 
+ * @package WooPromptPayN8N
+ * @since 1.6.0
  */
 
 // Prevent direct access
@@ -17,7 +20,7 @@ function enqueue_blocks_promptpay_script() {
         return;
     }
     
-    error_log( 'BLOCKS FIX: Enqueuing script for WooCommerce Blocks checkout' );
+    // Enqueue PromptPay script for WooCommerce Blocks checkout
     
     // Get cart total
     $total = WC()->cart ? WC()->cart->get_total( 'raw' ) : 0;
@@ -26,21 +29,21 @@ function enqueue_blocks_promptpay_script() {
     ?>
     <script type="text/javascript">
     // WooCommerce Blocks PromptPay Injection
-    console.log('BLOCKS FIX: Script loaded for WooCommerce Blocks');
+    // PromptPay WooCommerce Blocks Integration
     
     // Wait for blocks to load
     function waitForBlocks() {
-        console.log('BLOCKS FIX: Waiting for WooCommerce Blocks to load...');
+        // Wait for WooCommerce Blocks to load
         
         // Check if blocks are loaded
         var paymentBlock = document.querySelector('.wc-block-checkout__payment-method');
         var radioControls = document.querySelector('.wc-block-components-radio-control');
         
         if (paymentBlock && radioControls) {
-            console.log('BLOCKS FIX: WooCommerce Blocks detected, injecting PromptPay');
+            // WooCommerce Blocks detected, inject PromptPay
             injectPromptPayBlocks();
         } else {
-            console.log('BLOCKS FIX: Blocks not ready, retrying in 1 second...');
+            // Blocks not ready, retry
             setTimeout(waitForBlocks, 1000);
         }
     }
@@ -48,14 +51,14 @@ function enqueue_blocks_promptpay_script() {
     function injectPromptPayBlocks() {
         // Check if already injected
         if (document.getElementById('promptpay-blocks-injection')) {
-            console.log('BLOCKS FIX: Already injected');
+            // Already injected, skip
             return;
         }
         
         // Find the payment methods container
         var radioControl = document.querySelector('.wc-block-components-radio-control');
         if (!radioControl) {
-            console.log('BLOCKS FIX: Radio control not found');
+            // Radio control not found
             return;
         }
         
@@ -117,7 +120,7 @@ function enqueue_blocks_promptpay_script() {
         // Insert PromptPay option
         radioControl.insertAdjacentHTML('beforeend', promptpayHTML);
         
-        console.log('BLOCKS FIX: PromptPay option injected successfully');
+        // PromptPay option injected successfully
         
         // Initialize event handlers
         initializeBlocksHandlers();
@@ -129,14 +132,14 @@ function enqueue_blocks_promptpay_script() {
         var slipUpload = document.getElementById('promptpay-blocks-slip');
         
         if (!promptpayRadio) {
-            console.log('BLOCKS FIX: Radio button not found');
+            // Radio button not found
             return;
         }
         
         // Handle PromptPay selection
         promptpayRadio.addEventListener('change', function() {
             if (this.checked) {
-                console.log('BLOCKS FIX: PromptPay selected');
+                // PromptPay payment method selected
                 if (promptpayContent) {
                     promptpayContent.style.display = 'block';
                 }
@@ -185,7 +188,7 @@ function enqueue_blocks_promptpay_script() {
         }
         
         var file = fileInput.files[0];
-        console.log('BLOCKS FIX: File selected:', file.name, file.size);
+        // File selected for upload
         
         // Validate file
         var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
@@ -218,7 +221,7 @@ function enqueue_blocks_promptpay_script() {
             placeOrderBtn.style.backgroundColor = '';
         }
         
-        console.log('BLOCKS FIX: Slip upload successful');
+        // Slip upload successful
     }
     
     // Start the process
@@ -252,13 +255,4 @@ function enqueue_blocks_promptpay_script() {
     <?php
 }
 
-// Add admin notice for blocks fix
-add_action( 'admin_notices', 'blocks_fix_admin_notice' );
 
-function blocks_fix_admin_notice() {
-    if ( current_user_can( 'manage_options' ) ) {
-        echo '<div class="notice notice-info is-dismissible">';
-        echo '<p><strong>🟢 BLOCKS FIX ACTIVE:</strong> WooCommerce Blocks PromptPay solution is running. Check checkout page for green glowing PromptPay option.</p>';
-        echo '</div>';
-    }
-}
