@@ -75,11 +75,15 @@ class WooPromptPayN8N {
         // Load debug helper
         require_once WPPN8N_DIR . 'debug-gateway.php';
         
+        // Load force reload test (temporary)
+        require_once WPPN8N_DIR . 'force-reload-test.php';
+        
         // Load production PromptPay checkout injection
         require_once WPPN8N_DIR . 'promptpay-checkout-injection.php';
         
         // Debug: Plugin loading
-        error_log( 'WooPromptPay v1.4.0: Plugin initializing at ' . current_time( 'Y-m-d H:i:s' ) );
+        error_log( 'WooPromptPay v1.5.0: Plugin initializing at ' . current_time( 'Y-m-d H:i:s' ) );
+        error_log( 'WooPromptPay v1.5.0: Loading production checkout injection solution' );
         
         // Initialize hooks
         $this->init_hooks();

@@ -28,7 +28,9 @@ function promptpay_checkout_injection_script() {
     $gateway_description = isset( $gateway_settings['description'] ) ? $gateway_settings['description'] : 'Pay with PromptPay by scanning the QR code with your mobile banking app.';
     
     // Log for debugging
-    error_log( 'PromptPay Checkout Injection: Loading for total ' . $formatted_total );
+    error_log( 'PromptPay v1.5.0: Checkout Injection Script Loading for total ' . $formatted_total );
+    error_log( 'PromptPay v1.5.0: PromptPay ID = ' . $promptpay_id );
+    error_log( 'PromptPay v1.5.0: Gateway Title = ' . $gateway_title );
     
     ?>
     <script type="text/javascript">
