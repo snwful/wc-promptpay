@@ -3,7 +3,7 @@
  * Plugin Name: Woo PromptPay n8n
  * Description: Accept PromptPay payments in WooCommerce with QR generation, slip upload and n8n webhook confirmation.
  * Author: Senior WordPress Developer
- * Version: 1.3.0
+ * Version: 1.4.0
  * License: GPL2+
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'WPPN8N_VERSION', '1.3.0' );
+define( 'WPPN8N_VERSION', '1.4.0' );
 define( 'WPPN8N_FILE', __FILE__ );
 define( 'WPPN8N_BASENAME', plugin_basename( __FILE__ ) );
 define( 'WPPN8N_DIR', plugin_dir_path( __FILE__ ) );
@@ -107,6 +107,10 @@ class WooPromptPayN8N {
         // Debug checkout rendering
         add_action( 'woocommerce_review_order_before_payment', [ $this, 'debug_payment_methods' ] );
         add_action( 'wp_footer', [ $this, 'debug_checkout_js' ] );
+        
+        // Force inject PromptPay into checkout template
+        add_action( 'woocommerce_review_order_after_payment', [ $this, 'inject_promptpay_option' ] );
+        add_action( 'wp_head', [ $this, 'inject_promptpay_styles' ] );
         
         // Add rewrite rules for webhook endpoint
         add_action( 'init', [ $this, 'add_rewrite_rules' ] );
@@ -278,6 +282,111 @@ class WooPromptPayN8N {
             }
         });
         </script>
+        <?php
+    }
+    
+    /**
+     * Force inject PromptPay option into checkout
+     */
+    public function inject_promptpay_option() {
+        if ( ! is_checkout() ) {
+            return;
+        }
+        
+        $available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+        
+        if ( ! isset( $available_gateways['promptpay_n8n'] ) ) {
+            error_log( 'WooPromptPay: Gateway not available for injection' );
+            return;
+        }
+        
+        $gateway = $available_gateways['promptpay_n8n'];
+        $total = WC()->cart->get_total( 'raw' );
+        
+        error_log( 'WooPromptPay: Injecting PromptPay option manually' );
+        
+        ?>
+        <div id="promptpay-manual-injection" style="margin: 20px 0; padding: 15px; border: 2px solid #0073aa; border-radius: 5px; background: #f0f8ff;">
+            <h3 style="margin-top: 0; color: #0073aa;">🔥 PromptPay Payment (Manual Injection)</h3>
+            <p><strong>Amount:</strong> ฿<?php echo number_format( $total, 2 ); ?></p>
+            
+            <div style="margin: 15px 0;">
+                <label>
+                    <input type="radio" name="payment_method" value="promptpay_n8n" id="payment_method_promptpay_n8n" />
+                    <strong><?php echo esc_html( $gateway->get_title() ); ?></strong>
+                </label>
+                <div style="margin-left: 25px; margin-top: 10px;">
+                    <p><?php echo esc_html( $gateway->get_description() ); ?></p>
+                    
+                    <!-- QR Code Placeholder -->
+                    <div style="text-align: center; margin: 15px 0; padding: 20px; background: #fff; border: 1px dashed #ccc;">
+                        <p><strong>QR Code will appear here</strong></p>
+                        <p>Amount: ฿<?php echo number_format( $total, 2 ); ?></p>
+                    </div>
+                    
+                    <!-- Upload Form -->
+                    <div style="margin: 15px 0;">
+                        <label for="promptpay_slip"><strong>Upload Payment Slip:</strong></label><br>
+                        <input type="file" id="promptpay_slip" name="promptpay_slip" accept="image/*,.pdf" style="margin-top: 5px;" />
+                        <p style="font-size: 12px; color: #666;">Upload your payment slip (JPG, PNG, or PDF, max 5MB)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            console.log('PromptPay: Manual injection loaded');
+            
+            // Handle payment method selection
+            $('#payment_method_promptpay_n8n').on('change', function() {
+                if ($(this).is(':checked')) {
+                    console.log('PromptPay: Payment method selected');
+                    // Disable place order until slip is uploaded and verified
+                    $('#place_order').prop('disabled', true).text('Please upload payment slip first');
+                }
+            });
+            
+            // Handle other payment methods
+            $('input[name="payment_method"]:not(#payment_method_promptpay_n8n)').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#place_order').prop('disabled', false).text('Place order');
+                }
+            });
+        });
+        </script>
+        <?php
+    }
+    
+    /**
+     * Inject PromptPay styles
+     */
+    public function inject_promptpay_styles() {
+        if ( ! is_checkout() ) {
+            return;
+        }
+        
+        ?>
+        <style type="text/css">
+        #promptpay-manual-injection {
+            animation: promptpay-highlight 2s ease-in-out;
+        }
+        
+        @keyframes promptpay-highlight {
+            0% { background-color: #fff3cd; }
+            50% { background-color: #f0f8ff; }
+            100% { background-color: #f0f8ff; }
+        }
+        
+        #promptpay-manual-injection input[type="radio"]:checked + strong {
+            color: #0073aa;
+        }
+        
+        #promptpay-manual-injection .payment-fields {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        </style>
         <?php
     }
     

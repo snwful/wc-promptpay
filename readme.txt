@@ -4,7 +4,7 @@ Tags: woocommerce, payment, promptpay, thailand, n8n, webhook
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPL2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,13 @@ Yes, the plugin includes multiple security measures:
 
 == Changelog ==
 
+= 1.4.0 =
+* Added: Manual injection workaround to display PromptPay payment method in checkout options
+* Changed: Bump plugin version to 1.4.0
+* Improved: Updated debug-gateway output and hooks for checkout rendering
+
+= 1.3.0 =
+
 = 1.3.0 =
 * Fixed: แก้ไข PHP deprecated dynamic property warnings
 * Fixed: ปรับปรุงการบังคับให้ gateway แสดงใน Payment options
@@ -128,6 +135,11 @@ Yes, the plugin includes multiple security measures:
 * Complete security implementation
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+Manual injection workaround for PromptPay rendering in checkout. Highly recommended update.
+
+= 1.3.0 =
 
 = 1.3.0 =
 Critical update: Fixes PHP deprecated warnings and improves gateway visibility. Highly recommended for all users.

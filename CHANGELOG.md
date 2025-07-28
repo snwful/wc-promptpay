@@ -2,6 +2,16 @@
 
 All notable changes to the Woo PromptPay n8n plugin will be documented in this file.
 
+## [1.4.0] - 2025-07-28
+### Added
+- Manual injection workaround to display PromptPay payment method in checkout options
+
+### Changed
+- Bump plugin version to 1.4.0
+
+### Improved
+- Updated debug-gateway output and hooks for checkout rendering
+
 ## [1.3.0] - 2023-11-30
 ### Fixed
 - แก้ไข PHP deprecated dynamic property warnings ใน gateway class
