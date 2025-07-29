@@ -3,7 +3,7 @@
  * Plugin Name: Woo PromptPay n8n
  * Description: Accept PromptPay payments in WooCommerce with QR generation, slip upload and n8n webhook confirmation.
  * Author: Senior WordPress Developer
- * Version: 1.6.1
+ * Version: 1.6.2
  * License: GPL2+
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'WPPN8N_VERSION', '1.6.1' );
+define( 'WPPN8N_VERSION', '1.6.2' );
 define( 'WPPN8N_FILE', __FILE__ );
 define( 'WPPN8N_BASENAME', plugin_basename( __FILE__ ) );
 define( 'WPPN8N_DIR', plugin_dir_path( __FILE__ ) );
