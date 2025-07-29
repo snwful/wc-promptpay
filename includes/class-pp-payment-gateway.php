@@ -28,11 +28,11 @@ class PP_Payment_Gateway extends \WC_Payment_Gateway {
     public $n8n_webhook_url;
     
     /**
-     * Maximum upload attempts per order
+     * Maximum upload attempts
      * @var int
      */
     public $max_attempts;
-
+    
     /**
      * Constructor
      */

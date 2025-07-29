@@ -75,8 +75,11 @@ class WooPromptPayN8N {
         // Load debug helper
         require_once WPPN8N_DIR . 'debug-gateway.php';
         
-        // Load WooCommerce Blocks PromptPay solution
-        require_once WPPN8N_DIR . 'class-pp-blocks-checkout.php';
+        // Load WooCommerce Blocks integration
+        if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+            require_once WPPN8N_DIR . 'includes/class-pp-blocks-integration.php';
+            add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_blocks_payment_method' ] );
+        }
         
         // Initialize hooks
         $this->init_hooks();
@@ -156,6 +159,18 @@ class WooPromptPayN8N {
     }
     
     /**
+     * Register WooCommerce Blocks payment method
+     */
+    public function register_blocks_payment_method( $payment_method_registry ) {
+        if ( class_exists( 'WooPromptPay\Blocks\PP_Blocks_Integration' ) ) {
+            $payment_method_registry->register( new WooPromptPay\Blocks\PP_Blocks_Integration() );
+            error_log( 'WooPromptPay: Blocks payment method registered' );
+        } else {
+            error_log( 'WooPromptPay: Blocks integration class not found!' );
+        }
+    }
+    
+    /**
      * Force PromptPay gateway to be available at checkout
      */
     public function force_gateway_availability( $available_gateways ) {
@@ -175,13 +190,13 @@ class WooPromptPayN8N {
             $gateway = $all_gateways['promptpay_n8n'];
             error_log( 'WooPromptPay: Gateway found - Enabled: ' . $gateway->enabled . ', PromptPay ID: ' . $gateway->promptpay_id );
             
-            // Force add our gateway if it's enabled (matching is_available logic)
-            if ( 'yes' === $gateway->enabled ) {
+            // Force add our gateway if it's enabled and has PromptPay ID
+            if ( 'yes' === $gateway->enabled && ! empty( $gateway->promptpay_id ) ) {
                 $available_gateways['promptpay_n8n'] = $gateway;
                 error_log( 'WooPromptPay: Forced PromptPay gateway to be available' );
                 error_log( 'WooPromptPay: New available gateways count = ' . count( $available_gateways ) );
             } else {
-                error_log( 'WooPromptPay: Gateway not added - gateway disabled' );
+                error_log( 'WooPromptPay: Gateway not added - conditions not met' );
             }
         } else {
             error_log( 'WooPromptPay: Gateway not found in all_gateways' );
