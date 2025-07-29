@@ -24,12 +24,6 @@ class WC_Payment_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
         $this->has_fields         = true;
         $this->method_title       = __( 'PromptPay n8n Gateway', 'promptpay-n8n-gateway' );
         $this->method_description = __( 'Accept payments via PromptPay QR code with n8n webhook verification.', 'promptpay-n8n-gateway' );
-        
-        // Set gateway supports
-        $this->supports = array(
-            'products',
-            'refunds'
-        );
 
         // Load the settings
         $this->init_form_fields();
@@ -117,24 +111,13 @@ class WC_Payment_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
      * @return bool
      */
     public function is_available() {
-        // Basic availability check
         if ( 'yes' !== $this->enabled ) {
             return false;
         }
 
-        // For testing purposes, let's make it always available when enabled
-        // Remove the cart check for now to debug
-        // if ( ! WC()->cart || WC()->cart->is_empty() ) {
-        //     return false;
-        // }
-
-        // Don't require webhook URL for basic availability (admin can configure later)
-        // if ( empty( $this->n8n_webhook_url ) ) {
-        //     return false;
-        // }
-
-        // Always return true when enabled for debugging
-        return true;
+        // Allow gateway to be available even without webhook URL for initial setup
+        // The webhook URL validation will happen during payment processing
+        return parent::is_available();
     }
 
     /**

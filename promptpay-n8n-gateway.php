@@ -55,6 +55,12 @@ class PromptPay_N8N_Gateway_Main {
      * Constructor
      */
     private function __construct() {
+        // Check for active WooCommerce first
+        if ( ! $this->is_woocommerce_active() ) {
+            add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
+            return;
+        }
+
         add_action( 'plugins_loaded', array( $this, 'init' ) );
         add_action( 'init', array( $this, 'load_textdomain' ) );
         register_activation_hook( __FILE__, array( $this, 'activate' ) );
@@ -65,26 +71,11 @@ class PromptPay_N8N_Gateway_Main {
      * Initialize the plugin
      */
     public function init() {
-        // Check if WooCommerce is active
-        if ( ! class_exists( 'WooCommerce' ) ) {
-            add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
-            return;
-        }
-
-        // Check WooCommerce version compatibility
-        if ( version_compare( WC_VERSION, '5.0', '<' ) ) {
-            add_action( 'admin_notices', array( $this, 'woocommerce_version_notice' ) );
-            return;
-        }
-
         // Load plugin files
         $this->load_files();
 
-        // Initialize payment gateway - this is the key fix!
-        add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateway_class' ) );
-        
-        // Force gateway availability check
-        add_filter( 'woocommerce_available_payment_gateways', array( $this, 'force_gateway_availability' ) );
+        // Initialize payment gateway
+        $this->init_payment_gateway();
 
         // Initialize admin menu
         if ( is_admin() ) {
@@ -114,7 +105,6 @@ class PromptPay_N8N_Gateway_Main {
      * Load plugin files
      */
     private function load_files() {
-        require_once PROMPTPAY_N8N_PLUGIN_PATH . 'includes/class-wc-payment-gateway-promptpay-n8n.php';
         require_once PROMPTPAY_N8N_PLUGIN_PATH . 'includes/class-admin-menu.php';
         require_once PROMPTPAY_N8N_PLUGIN_PATH . 'includes/class-rest-api.php';
         require_once PROMPTPAY_N8N_PLUGIN_PATH . 'includes/class-qr-generator.php';
@@ -125,42 +115,20 @@ class PromptPay_N8N_Gateway_Main {
     }
 
     /**
-     * Add gateway class to WooCommerce
+     * Check if WooCommerce is active
      *
-     * @param array $gateways
-     * @return array
+     * @return bool
      */
-    public function add_gateway_class( $gateways ) {
-        // Make sure our gateway class is loaded
-        if ( class_exists( 'WC_Payment_Gateway_PromptPay_N8N' ) ) {
-            $gateways[] = 'WC_Payment_Gateway_PromptPay_N8N';
-        }
-        return $gateways;
+    private function is_woocommerce_active() {
+        return in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) );
     }
 
     /**
-     * Force gateway availability - this ensures our gateway shows up even when it's the only one
-     *
-     * @param array $available_gateways
-     * @return array
+     * Initialize payment gateway
      */
-    public function force_gateway_availability( $available_gateways ) {
-        // Only run on frontend checkout
-        if ( is_admin() || ! is_checkout() ) {
-            return $available_gateways;
-        }
-
-        // Check if our gateway should be available
-        if ( isset( $available_gateways['promptpay_n8n'] ) ) {
-            $gateway = $available_gateways['promptpay_n8n'];
-            
-            // Force availability if gateway is enabled
-            if ( $gateway->enabled === 'yes' ) {
-                $available_gateways['promptpay_n8n'] = $gateway;
-            }
-        }
-
-        return $available_gateways;
+    public function init_payment_gateway() {
+        // Hook into plugins_loaded to ensure WooCommerce is fully loaded
+        add_action( 'plugins_loaded', 'promptpay_n8n_init_gateway_class' );
     }
 
     /**
@@ -326,18 +294,40 @@ class PromptPay_N8N_Gateway_Main {
              esc_html__( 'WooCommerce is required for this plugin to work.', 'promptpay-n8n-gateway' ) . 
              '</p></div>';
     }
-
-    /**
-     * WooCommerce version notice
-     */
-    public function woocommerce_version_notice() {
-        echo '<div class="error"><p><strong>' . 
-             esc_html__( 'PromptPay n8n Gateway', 'promptpay-n8n-gateway' ) . 
-             '</strong>: ' . 
-             sprintf( esc_html__( 'WooCommerce version 5.0 or higher is required. You are running version %s.', 'promptpay-n8n-gateway' ), WC_VERSION ) . 
-             '</p></div>';
-    }
 }
 
 // Initialize the plugin
 PromptPay_N8N_Gateway_Main::get_instance();
+
+/**
+ * Initialize PromptPay n8n Gateway Class
+ * 
+ * Load the payment gateway class once WooCommerce is loaded
+ */
+if ( ! function_exists( 'promptpay_n8n_init_gateway_class' ) ) {
+    function promptpay_n8n_init_gateway_class() {
+        // Check if WooCommerce Payment Gateway class exists
+        if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+            return;
+        }
+
+        // Load the payment gateway class
+        require_once PROMPTPAY_N8N_PLUGIN_PATH . 'includes/class-wc-payment-gateway-promptpay-n8n.php';
+
+        // Add the gateway to WooCommerce
+        add_filter( 'woocommerce_payment_gateways', 'promptpay_n8n_add_gateway_class' );
+    }
+}
+
+/**
+ * Add PromptPay n8n Gateway to WooCommerce
+ *
+ * @param array $gateways
+ * @return array
+ */
+if ( ! function_exists( 'promptpay_n8n_add_gateway_class' ) ) {
+    function promptpay_n8n_add_gateway_class( $gateways ) {
+        $gateways[] = 'WC_Payment_Gateway_PromptPay_N8N';
+        return $gateways;
+    }
+}
