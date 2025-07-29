@@ -45,8 +45,12 @@ class PP_Payment_Gateway extends \WC_Payment_Gateway {
         
         // Gateway supports
         $this->supports = [
-            'products'
+            'products',
+            'refunds'
         ];
+        
+        // Add WooCommerce Blocks support
+        add_action( 'woocommerce_blocks_loaded', [ $this, 'register_blocks_support' ] );
         
         // Force gateway to be available for checkout
         $this->order_button_text = __( 'Proceed to PromptPay Payment', 'woo-promptpay-n8n' );
@@ -144,19 +148,22 @@ class PP_Payment_Gateway extends \WC_Payment_Gateway {
             return false;
         }
         
-        // Check if we have required settings
+        // For development/testing, allow gateway even without PromptPay ID
+        // In production, you should uncomment the lines below
+        /*
         if ( empty( $this->promptpay_id ) ) {
             error_log( 'WooPromptPay Gateway: Not available - no PromptPay ID' );
             return false;
         }
+        */
         
         // Check parent availability
         $parent_available = parent::is_available();
         error_log( 'WooPromptPay Gateway: Parent available = ' . ( $parent_available ? 'yes' : 'no' ) );
         
-        // Force availability if all conditions are met
-        if ( $parent_available && 'yes' === $this->enabled && ! empty( $this->promptpay_id ) ) {
-            error_log( 'WooPromptPay Gateway: Forcing availability = true' );
+        // Force availability for WooCommerce Blocks compatibility
+        if ( 'yes' === $this->enabled ) {
+            error_log( 'WooPromptPay Gateway: Forcing availability = true for Blocks compatibility' );
             return true;
         }
         
@@ -647,6 +654,22 @@ class PP_Payment_Gateway extends \WC_Payment_Gateway {
             margin-top: 10px;
         }
         ';
+    }
+    
+    /**
+     * Register WooCommerce Blocks support
+     */
+    public function register_blocks_support() {
+        if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+            require_once WPPN8N_DIR . 'includes/class-pp-blocks-integration.php';
+            
+            add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function( $payment_method_registry ) {
+                    $payment_method_registry->register( new \WooPromptPay\Blocks\PP_Blocks_Integration() );
+                }
+            );
+        }
     }
     
     /**

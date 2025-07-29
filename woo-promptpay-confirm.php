@@ -146,8 +146,8 @@ class WooPromptPayN8N {
         
         // Check if class exists
         if ( class_exists( 'WooPromptPay\Gateway\PP_Payment_Gateway' ) ) {
-            $gateways[] = Gateway\PP_Payment_Gateway::class;
-            error_log( 'WooPromptPay: Gateway class added to gateways array' );
+            $gateways['promptpay_n8n'] = 'WooPromptPay\Gateway\PP_Payment_Gateway';
+            error_log( 'WooPromptPay: Gateway class added to gateways array with key promptpay_n8n' );
         } else {
             error_log( 'WooPromptPay: Gateway class not found!' );
         }
