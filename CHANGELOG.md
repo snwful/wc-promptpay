@@ -2,6 +2,19 @@
 
 All notable changes to the Woo PromptPay n8n plugin will be documented in this file.
 
+## [1.6.1] - 2025-07-29
+### Fixed
+- PromptPay payment method now displays correctly even when all other payment methods are disabled
+- Place Order button is now properly disabled until slip upload validation passes
+- Enhanced container detection for WooCommerce Blocks checkout
+- Better adaptive HTML generation for different checkout scenarios
+- More robust payment method selection handling
+
+### Improved
+- Smart detection system that works with various WooCommerce Blocks configurations
+- Fallback mechanisms for different payment method scenarios
+- Better user experience with proper button state management
+
 ## [1.6.0] - 2025-07-29
 ### Added
 - Full WooCommerce Blocks checkout support with JavaScript DOM injection

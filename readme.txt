@@ -4,7 +4,7 @@ Tags: woocommerce, payment, promptpay, thailand, n8n, webhook
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPL2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,13 @@ Yes, the plugin includes multiple security measures:
 
 == Changelog ==
 
+= 1.6.1 =
+* Fixed: PromptPay payment method now displays correctly even when all other payment methods are disabled
+* Fixed: Place Order button is now properly disabled until slip upload validation passes
+* Improved: Enhanced container detection for WooCommerce Blocks checkout
+* Improved: Better adaptive HTML generation for different checkout scenarios
+* Improved: More robust payment method selection handling
+
 = 1.6.0 =
 * Added: Full WooCommerce Blocks checkout support with JavaScript DOM injection
 * Added: Thai language interface for PromptPay payment method
@@ -169,6 +176,9 @@ Yes, the plugin includes multiple security measures:
 * Complete security implementation
 
 == Upgrade Notice ==
+
+= 1.6.1 =
+Bug fix release: Fixes PromptPay display issues when other payment methods are disabled and improves Place Order button control. Recommended update for all users.
 
 = 1.6.0 =
 Major release: Full WooCommerce Blocks support with clean, optimized codebase. PromptPay now works perfectly with modern WooCommerce checkout. Highly recommended for all users.

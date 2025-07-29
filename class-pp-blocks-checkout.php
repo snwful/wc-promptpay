@@ -35,11 +35,13 @@ function enqueue_blocks_promptpay_script() {
     function waitForBlocks() {
         // Wait for WooCommerce Blocks to load
         
-        // Check if blocks are loaded
+        // Check if blocks are loaded - be more flexible
         var paymentBlock = document.querySelector('.wc-block-checkout__payment-method');
-        var radioControls = document.querySelector('.wc-block-components-radio-control');
+        var paymentStep = document.querySelector('.wc-block-components-checkout-step__content');
+        var checkoutForm = document.querySelector('.wc-block-checkout__main');
         
-        if (paymentBlock && radioControls) {
+        // If any payment-related container is found, try to inject
+        if (paymentBlock || paymentStep || checkoutForm) {
             // WooCommerce Blocks detected, inject PromptPay
             injectPromptPayBlocks();
         } else {
@@ -55,70 +57,94 @@ function enqueue_blocks_promptpay_script() {
             return;
         }
         
-        // Find the payment methods container
+        // Find the payment methods container - try multiple selectors
         var radioControl = document.querySelector('.wc-block-components-radio-control');
-        if (!radioControl) {
-            // Radio control not found
+        var paymentBlock = document.querySelector('.wc-block-checkout__payment-method');
+        var paymentContent = document.querySelector('.wc-block-components-checkout-step__content');
+        
+        // Use the first available container
+        var targetContainer = radioControl || paymentBlock || paymentContent;
+        
+        if (!targetContainer) {
+            // No suitable container found, try again later
+            setTimeout(injectPromptPayBlocks, 1000);
             return;
         }
         
-        // Create PromptPay option HTML
-        var promptpayHTML = `
-        <div id="promptpay-blocks-injection" class="wc-block-components-radio-control-accordion-option" style="border: 3px solid #00aa44; border-radius: 8px; margin: 10px 0; background: #f0fff0;">
-            <label class="wc-block-components-radio-control__option" for="promptpay-blocks-radio" style="padding: 15px;">
-                <input id="promptpay-blocks-radio" class="wc-block-components-radio-control__input" type="radio" name="radio-control-wc-payment-method-options" value="promptpay_blocks" style="margin-right: 10px;">
-                <div class="wc-block-components-radio-control__option-layout">
-                    <div class="wc-block-components-radio-control__label-group">
-                        <span class="wc-block-components-radio-control__label">
-                            <span class="wc-block-components-payment-method-label" style="font-weight: bold; color: #00aa44;">
-                                🟢 PromptPay (Blocks Fix) - ฿<?php echo $formatted_total; ?>
-                            </span>
+        // Create PromptPay payment option HTML - adapt based on container type
+        var isRadioControl = !!radioControl;
+        var promptpayHTML = '';
+        
+        if (isRadioControl) {
+            // Standard radio control option
+            promptpayHTML = `
+            <div class="wc-block-components-radio-control__option" id="promptpay-blocks-injection">
+                <input type="radio" id="promptpay-blocks-radio" name="radio-control-wc-payment-method-options" value="promptpay_n8n" class="wc-block-components-radio-control__input">
+                <label for="promptpay-blocks-radio" class="wc-block-components-radio-control__label">
+                    <span class="wc-block-components-radio-control__label-group">
+                        <span class="wc-block-components-radio-control__text">
+                            <span class="wc-block-components-payment-method-label__text">PromptPay (Blocks Fix) - ฿${window.wcBlocksData?.cartTotals?.total_price || '<?php echo $formatted_total; ?>'} </span>
                         </span>
-                    </div>
-                </div>
-            </label>
-            
-            <div id="promptpay-blocks-content" class="wc-block-components-radio-control-accordion-content" style="display: none; padding: 20px; background: #fff; margin: 10px; border-radius: 5px;">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h3 style="color: #00aa44; margin: 0 0 15px 0;">💳 ชำระเงินผ่าน PromptPay</h3>
-                    <p style="margin: 0 0 15px 0; color: #666;">สแกน QR Code ด้วยแอปธนาคารของคุณ</p>
-                </div>
-                
-                <div style="text-align: center; margin: 20px 0; padding: 30px; background: #f9f9f9; border: 2px dashed #ccc; border-radius: 8px;">
-                    <div style="font-size: 48px; margin-bottom: 15px;">📱</div>
-                    <p style="margin: 0; font-weight: bold; font-size: 18px;">QR Code สำหรับชำระเงิน</p>
-                    <p style="margin: 10px 0; font-size: 24px; color: #00aa44; font-weight: bold;">
-                        จำนวนเงิน: ฿<?php echo $formatted_total; ?>
-                    </p>
-                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">
-                        PromptPay ID: 0864639798
-                    </p>
-                </div>
-                
-                <div style="margin: 20px 0;">
-                    <h4 style="margin: 0 0 10px 0; color: #333;">📄 อัปโหลดสลิปการชำระเงิน</h4>
-                    <input type="file" id="promptpay-blocks-slip" accept="image/*,.pdf" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;" />
-                    <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">
-                        รองรับไฟล์: JPG, PNG, PDF (ขนาดไม่เกิน 5MB)
-                    </p>
-                    <div id="blocks-slip-status" style="margin-top: 15px;"></div>
-                </div>
-                
-                <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
-                    <h5 style="margin: 0 0 10px 0; color: #856404;">📋 วิธีการชำระเงิน:</h5>
-                    <ol style="margin: 0; padding-left: 20px; color: #856404; line-height: 1.6;">
-                        <li>สแกน QR Code ด้วยแอปธนาคารของคุณ</li>
-                        <li>ทำการชำระเงินตามจำนวนที่แสดง</li>
-                        <li>อัปโหลดสลิปการชำระเงิน</li>
-                        <li>คลิก "Place order" เพื่อดำเนินการต่อ</li>
-                    </ol>
+                    </span>
+                </label>
+                <div id="promptpay-blocks-content" class="wc-block-components-radio-control__option-layout" style="display: none; margin-top: 15px; padding: 20px; border: 2px solid #00d084; border-radius: 8px; background: #f8f9fa;">
+                    ${getPromptPayContentHTML()}
                 </div>
             </div>
-        </div>
-        `;
+            `;
+        } else {
+            // Standalone payment section when no other methods exist
+            promptpayHTML = `
+            <div class="promptpay-standalone-section" id="promptpay-blocks-injection" style="margin: 20px 0; padding: 20px; border: 2px solid #00d084; border-radius: 8px; background: #f8f9fa;">
+                <h3 style="margin: 0 0 20px; color: #333; font-size: 18px;">💳 วิธีการชำระเงิน</h3>
+                <div class="promptpay-payment-option" style="margin-bottom: 15px;">
+                    <input type="radio" id="promptpay-blocks-radio" name="payment_method" value="promptpay_n8n" checked style="margin-right: 10px;">
+                    <label for="promptpay-blocks-radio" style="font-weight: bold; color: #333;">PromptPay - ฿${window.wcBlocksData?.cartTotals?.total_price || '<?php echo $formatted_total; ?>'} </label>
+                </div>
+                <div id="promptpay-blocks-content" style="display: block;">
+                    ${getPromptPayContentHTML()}
+                </div>
+            </div>
+            `;
+        }
         
-        // Insert PromptPay option
-        radioControl.insertAdjacentHTML('beforeend', promptpayHTML);
+        function getPromptPayContentHTML() {
+            return `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; display: inline-block; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="width: 200px; height: 200px; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border-radius: 8px;">
+                            <span style="color: #666; font-size: 14px;">QR Code Placeholder</span>
+                        </div>
+                        <p style="margin: 0; font-size: 16px; font-weight: bold; color: #333;">ยอดชำระ: ฿${window.wcBlocksData?.cartTotals?.total_price || '<?php echo $formatted_total; ?>'} </p>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <p style="margin: 0 0 10px; font-weight: bold; color: #333;">📱 วิธีการชำระเงิน:</p>
+                    <ol style="margin: 0; padding-left: 20px; color: #666; line-height: 1.6;">
+                        <li>เปิดแอปธนาคารบนมือถือ</li>
+                        <li>สแกน QR Code ด้านบน</li>
+                        <li>ตรวจสอบยอดเงินให้ถูกต้อง</li>
+                        <li>ยืนยันการโอนเงิน</li>
+                        <li>อัปโหลดสลิปการโอนด้านล่าง</li>
+                    </ol>
+                </div>
+                <div style="border: 2px dashed #00d084; border-radius: 8px; padding: 20px; background: white;">
+                    <label for="promptpay-blocks-slip" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">📎 อัปโหลดสลิปการโอนเงิน:</label>
+                    <input type="file" id="promptpay-blocks-slip" accept="image/*,.pdf" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+                    <p style="margin: 0; font-size: 12px; color: #666;">รองรับไฟล์: JPG, PNG, PDF (ขนาดไม่เกิน 5MB)</p>
+                    <div id="promptpay-upload-status" style="margin-top: 10px;"></div>
+                </div>
+            `;
+        }
+        
+        // Insert PromptPay option into the target container
+        if (radioControl) {
+            // If radio control exists, insert as a new option
+            radioControl.insertAdjacentHTML('beforeend', promptpayHTML);
+        } else {
+            // If no radio control, create our own payment section
+            targetContainer.insertAdjacentHTML('beforeend', promptpayHTML);
+        }
         
         // PromptPay option injected successfully
         
@@ -144,32 +170,44 @@ function enqueue_blocks_promptpay_script() {
                     promptpayContent.style.display = 'block';
                 }
                 
-                // Disable place order button
+                // Disable place order until slip is uploaded
                 var placeOrderBtn = document.querySelector('.wc-block-components-checkout-place-order-button button, .wc-block-cart__submit-button, [data-block-name="woocommerce/checkout-actions-block"] button');
                 if (placeOrderBtn) {
                     placeOrderBtn.disabled = true;
-                    placeOrderBtn.textContent = 'กรุณาอัปโหลดสลิปก่อนสั่งซื้อ';
+                    placeOrderBtn.textContent = 'กรุณาอัปโหลดสลิปการโอนเงิน';
                     placeOrderBtn.style.backgroundColor = '#ccc';
+                }
+            } else {
+                if (promptpayContent) {
+                    promptpayContent.style.display = 'none';
+                }
+                
+                // Re-enable place order for other payment methods
+                var placeOrderBtn = document.querySelector('.wc-block-components-checkout-place-order-button button, .wc-block-cart__submit-button, [data-block-name="woocommerce/checkout-actions-block"] button');
+                if (placeOrderBtn) {
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.textContent = 'สั่งซื้อ';
+                    placeOrderBtn.style.backgroundColor = '';
                 }
             }
         });
         
-        // Handle other payment methods
-        var otherRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]:not(#promptpay-blocks-radio)');
-        otherRadios.forEach(function(radio) {
-            radio.addEventListener('change', function() {
-                if (this.checked && promptpayContent) {
-                    promptpayContent.style.display = 'none';
-                    
-                    // Re-enable place order button
-                    var placeOrderBtn = document.querySelector('.wc-block-components-checkout-place-order-button button, .wc-block-cart__submit-button, [data-block-name="woocommerce/checkout-actions-block"] button');
-                    if (placeOrderBtn) {
-                        placeOrderBtn.disabled = false;
-                        placeOrderBtn.textContent = 'Place order';
-                        placeOrderBtn.style.backgroundColor = '';
+        // Monitor other payment method changes
+        var allRadios = document.querySelectorAll('input[name="radio-control-wc-payment-method-options"]');
+        allRadios.forEach(function(radio) {
+            if (radio.id !== 'promptpay-blocks-radio') {
+                radio.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Other payment method selected, enable place order
+                        var placeOrderBtn = document.querySelector('.wc-block-components-checkout-place-order-button button, .wc-block-cart__submit-button, [data-block-name="woocommerce/checkout-actions-block"] button');
+                        if (placeOrderBtn) {
+                            placeOrderBtn.disabled = false;
+                            placeOrderBtn.textContent = 'สั่งซื้อ';
+                            placeOrderBtn.style.backgroundColor = '';
+                        }
                     }
-                }
-            });
+                });
+            }
         });
         
         // Handle file upload
@@ -217,23 +255,44 @@ function enqueue_blocks_promptpay_script() {
         var placeOrderBtn = document.querySelector('.wc-block-components-checkout-place-order-button button, .wc-block-cart__submit-button, [data-block-name="woocommerce/checkout-actions-block"] button');
         if (placeOrderBtn) {
             placeOrderBtn.disabled = false;
-            placeOrderBtn.textContent = 'Place order';
+            placeOrderBtn.textContent = 'สั่งซื้อ';
             placeOrderBtn.style.backgroundColor = '';
         }
         
         // Slip upload successful
     }
     
+    // Disable Place Order button initially for PromptPay
+    function disablePlaceOrderInitially() {
+        var placeOrderBtn = document.querySelector('.wc-block-components-checkout-place-order-button button, .wc-block-cart__submit-button, [data-block-name="woocommerce/checkout-actions-block"] button');
+        if (placeOrderBtn && !placeOrderBtn.hasAttribute('data-promptpay-controlled')) {
+            placeOrderBtn.setAttribute('data-promptpay-controlled', 'true');
+            placeOrderBtn.disabled = true;
+            placeOrderBtn.textContent = 'กรุณาเลือกวิธีการชำระเงิน';
+            placeOrderBtn.style.backgroundColor = '#ccc';
+        }
+    }
+    
     // Start the process
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', waitForBlocks);
+        document.addEventListener('DOMContentLoaded', function() {
+            disablePlaceOrderInitially();
+            waitForBlocks();
+        });
     } else {
+        disablePlaceOrderInitially();
         waitForBlocks();
     }
     
     // Also try after a delay to catch late-loading blocks
-    setTimeout(waitForBlocks, 2000);
-    setTimeout(waitForBlocks, 5000);
+    setTimeout(function() {
+        disablePlaceOrderInitially();
+        waitForBlocks();
+    }, 2000);
+    setTimeout(function() {
+        disablePlaceOrderInitially();
+        waitForBlocks();
+    }, 5000);
     </script>
     
     <style>
