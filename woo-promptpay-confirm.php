@@ -76,11 +76,9 @@ class WooPromptPayN8N {
         require_once WPPN8N_DIR . 'debug-gateway.php';
         
         // Load WooCommerce Blocks PromptPay solution
-        // Legacy manual Blocks injection removed; using native Blocks integration
+        require_once WPPN8N_DIR . 'class-pp-blocks-checkout.php';
         
         // Initialize hooks
-        // Register WooCommerce Blocks integration
-        add_filter( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_blocks_integration' ] );
         $this->init_hooks();
     }
     
@@ -93,8 +91,6 @@ class WooPromptPayN8N {
         require_once WPPN8N_DIR . 'includes/class-pp-webhook-handler.php';
         require_once WPPN8N_DIR . 'includes/class-pp-upload-handler.php';
         require_once WPPN8N_DIR . 'includes/class-pp-admin-dashboard.php';
-        // Load WooCommerce Blocks integration class
-        require_once WPPN8N_DIR . 'includes/class-pp-blocks-integration.php';
     }
     
     /**
@@ -547,16 +543,6 @@ class WooPromptPayN8N {
         }
     }
     
-    /**
-     * WooCommerce missing notice
-     */
-    public function register_blocks_integration( $integrations ) {
-        if ( class_exists( '\\WooPromptPay\\Blocks\\PP_Blocks_Integration' ) ) {
-            $integrations[] = '\\WooPromptPay\\Blocks\\PP_Blocks_Integration';
-        }
-        return $integrations;
-    }
-
     /**
      * WooCommerce missing notice
      */
