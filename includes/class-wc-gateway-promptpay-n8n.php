@@ -5,7 +5,6 @@
  * @version 1.0.0
  * @since   1.0.0
  * @author  Lumi-dev
- * @package promptpay-n8n-gateway
  */
 
 // Exit if accessed directly.
@@ -15,19 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * WC_Gateway_PromptPay_N8N Class
- *
- * @class   WC_Gateway_PromptPay_N8N
- * @extends WC_Payment_Gateway
- * @version 1.0.0
- * @since   1.0.0
  */
 class WC_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
 
 	/**
 	 * Constructor.
-	 *
-	 * @version 1.0.0
-	 * @since   1.0.0
 	 */
 	public function __construct() {
 		
@@ -56,9 +47,6 @@ class WC_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
 
 	/**
 	 * Initialize Gateway Settings Form Fields.
-	 *
-	 * @version 1.0.0
-	 * @since   1.0.0
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
@@ -100,21 +88,7 @@ class WC_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check if this gateway is available in the user's country.
-	 *
-	 * @version 1.0.0
-	 * @since   1.0.0
-	 * @return  bool
-	 */
-	public function is_available() {
-		return parent::is_available();
-	}
-
-	/**
 	 * Payment form on checkout page.
-	 *
-	 * @version 1.0.0
-	 * @since   1.0.0
 	 */
 	public function payment_fields() {
 		if ( $this->description ) {
@@ -129,11 +103,6 @@ class WC_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
 
 	/**
 	 * Process the payment and return the result.
-	 *
-	 * @version 1.0.0
-	 * @since   1.0.0
-	 * @param   int $order_id Order ID.
-	 * @return  array
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -156,16 +125,8 @@ class WC_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
 
 	/**
 	 * Output for the order received page.
-	 *
-	 * @version 1.0.0
-	 * @since   1.0.0
-	 * @param   int $order_id Order ID.
 	 */
 	public function thankyou_page( $order_id ) {
-		if ( $this->instructions ) {
-			echo wpautop( wptexturize( $this->instructions ) );
-		}
-		
 		echo '<div id="promptpay-thankyou">';
 		echo '<h3>' . __( 'Payment Instructions', 'promptpay-n8n-gateway' ) . '</h3>';
 		echo '<p>' . __( 'Please scan the QR code below to make payment via PromptPay.', 'promptpay-n8n-gateway' ) . '</p>';
@@ -175,16 +136,10 @@ class WC_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
 
 	/**
 	 * Add content to the WC emails.
-	 *
-	 * @version 1.0.0
-	 * @since   1.0.0
-	 * @param   WC_Order $order Order object.
-	 * @param   bool     $sent_to_admin Sent to admin.
-	 * @param   bool     $plain_text Email format: plain text or HTML.
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		if ( $this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method() && $order->has_status( 'on-hold' ) ) {
-			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
+		if ( ! $sent_to_admin && $this->id === $order->get_payment_method() && $order->has_status( 'on-hold' ) ) {
+			echo '<p>' . __( 'Please make payment via PromptPay and upload your payment slip.', 'promptpay-n8n-gateway' ) . '</p>';
 		}
 	}
 }
