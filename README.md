@@ -193,7 +193,14 @@ This plugin is licensed under the GPL v3 or later.
 
 ## Changelog
 
-### Version 1.0.0
+### Version 1.0.1 - 2025-01-29
+- **Fixed**: HPOS (High-Performance Order Storage) compatibility
+- **Fixed**: Payment gateway not appearing in WooCommerce Payment providers list
+- **Changed**: Updated author to Lumi-dev
+- **Improved**: Payment gateway registration and initialization
+- **Enhanced**: WooCommerce integration compatibility
+
+### Version 1.0.0 - 2025-01-27
 - Initial release
 - PromptPay QR code generation
 - Payment slip upload functionality

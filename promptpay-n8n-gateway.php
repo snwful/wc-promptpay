@@ -3,9 +3,9 @@
  * Plugin Name: PromptPay n8n Gateway
  * Plugin URI: https://github.com/snwful/wc-promptpay
  * Description: A WooCommerce payment gateway for PromptPay with n8n webhook integration for payment verification.
- * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://yourwebsite.com
+ * Version: 1.0.1
+ * Author: Lumi-dev
+ * Author URI: https://github.com/Lumi-dev
  * Text Domain: promptpay-n8n-gateway
  * Domain Path: /languages
  * Requires at least: 5.0
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants
-define( 'PROMPTPAY_N8N_VERSION', '1.0.0' );
+define( 'PROMPTPAY_N8N_VERSION', '1.0.1' );
 define( 'PROMPTPAY_N8N_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'PROMPTPAY_N8N_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PROMPTPAY_N8N_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -63,6 +63,7 @@ class PromptPay_N8N_Gateway_Main {
 
         add_action( 'plugins_loaded', array( $this, 'init' ) );
         add_action( 'init', array( $this, 'load_textdomain' ) );
+        add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
         register_activation_hook( __FILE__, array( $this, 'activate' ) );
         register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
     }
@@ -102,6 +103,15 @@ class PromptPay_N8N_Gateway_Main {
     }
 
     /**
+     * Declare HPOS compatibility
+     */
+    public function declare_hpos_compatibility() {
+        if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+        }
+    }
+
+    /**
      * Load plugin files
      */
     private function load_files() {
@@ -128,7 +138,7 @@ class PromptPay_N8N_Gateway_Main {
      */
     public function init_payment_gateway() {
         // Hook into plugins_loaded to ensure WooCommerce is fully loaded
-        add_action( 'plugins_loaded', 'promptpay_n8n_init_gateway_class' );
+        add_action( 'plugins_loaded', 'promptpay_n8n_init_gateway_class', 11 );
     }
 
     /**

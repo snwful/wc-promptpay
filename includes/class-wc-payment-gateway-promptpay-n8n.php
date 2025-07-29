@@ -24,12 +24,14 @@ class WC_Payment_Gateway_PromptPay_N8N extends WC_Payment_Gateway {
         $this->has_fields         = true;
         $this->method_title       = __( 'PromptPay n8n Gateway', 'promptpay-n8n-gateway' );
         $this->method_description = __( 'Accept payments via PromptPay QR code with n8n webhook verification.', 'promptpay-n8n-gateway' );
+        $this->supports           = array( 'products' );
 
         // Load the settings
         $this->init_form_fields();
         $this->init_settings();
 
         // Define user set variables
+        $this->enabled            = $this->get_option( 'enabled' );
         $this->title              = $this->get_option( 'title' );
         $this->description        = $this->get_option( 'description' );
         $this->promptpay_id       = $this->get_option( 'promptpay_id' );
