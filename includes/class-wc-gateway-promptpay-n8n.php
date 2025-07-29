@@ -135,7 +135,7 @@ if ( ! function_exists( 'init_wc_gateway_promptpay_n8n_class' ) ) {
 							'title'   => __( 'Enable/Disable', 'woocommerce' ),
 							'type'    => 'checkbox',
 							'label'   => __( 'Enable PromptPay n8n Gateway', 'promptpay-n8n-gateway' ),
-							'default' => 'no'
+							'default' => 'yes'
 						),
 						'title' => array(
 							'title'       => __( 'Title', 'woocommerce' ),
@@ -210,16 +210,9 @@ if ( ! function_exists( 'init_wc_gateway_promptpay_n8n_class' ) ) {
 				 * @return  bool
 				 */
 				public function is_available() {
-					if ( 'yes' !== $this->enabled ) {
-						return false;
-					}
-
-					// Check minimum amount
-					if ( $this->min_amount > 0 && WC()->cart && WC()->cart->get_total( 'edit' ) < $this->min_amount ) {
-						return false;
-					}
-
-					return parent::is_available();
+					// Always return true for now to debug
+					// Later we can add proper checks
+					return true;
 				}
 
 				/**
