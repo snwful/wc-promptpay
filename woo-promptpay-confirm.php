@@ -175,13 +175,13 @@ class WooPromptPayN8N {
             $gateway = $all_gateways['promptpay_n8n'];
             error_log( 'WooPromptPay: Gateway found - Enabled: ' . $gateway->enabled . ', PromptPay ID: ' . $gateway->promptpay_id );
             
-            // Force add our gateway if it's enabled and has PromptPay ID
-            if ( 'yes' === $gateway->enabled && ! empty( $gateway->promptpay_id ) ) {
+            // Force add our gateway if it's enabled (matching is_available logic)
+            if ( 'yes' === $gateway->enabled ) {
                 $available_gateways['promptpay_n8n'] = $gateway;
                 error_log( 'WooPromptPay: Forced PromptPay gateway to be available' );
                 error_log( 'WooPromptPay: New available gateways count = ' . count( $available_gateways ) );
             } else {
-                error_log( 'WooPromptPay: Gateway not added - conditions not met' );
+                error_log( 'WooPromptPay: Gateway not added - gateway disabled' );
             }
         } else {
             error_log( 'WooPromptPay: Gateway not found in all_gateways' );
